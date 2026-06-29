@@ -1,0 +1,4 @@
+LIBRARY
+EXPORTS
+  __rustc_proc_macro_decls_a43c4dfe1722ef2__ DATA
+  rust_metadata_async_trait_a43c4dfe1722ef2 DATA
