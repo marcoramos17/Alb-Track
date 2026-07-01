@@ -37,6 +37,12 @@ fn main() -> Result<()> {
         )",
         [],
     )?;
+    db.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_alb_code_type
+        ON albs (alb_code, adult_alb)",
+        [],
+    )?;
+
 
     // CHURCH table
     db.execute(
@@ -73,6 +79,18 @@ fn main() -> Result<()> {
         [],
     )?;
 
+    // CHURCH <-> ALTAR SERVER ASSIGNMENT table
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS user_church (
+            id          INTEGER PRIMARY KEY,
+            user_id     INTEGER REFERENCES users(user_id),
+            church_id   INTEGER REFERENCES church(church_id),
+            date        TEXT NOT NULL,
+
+            CHECK (user_id IS NOT NULL OR church_id IS NOT NULL)
+        )",
+        [],
+    )?;
 
     // EXAMPLE ROW
     //db.execute(

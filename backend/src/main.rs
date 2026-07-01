@@ -7,13 +7,18 @@ use axum::Router;
 use db::connector::connect_pool;
 use tokio::net::TcpListener;
 use axum::serve;
-use tower_http::cors::{CorsLayer, Any};
+use axum::routing::get_service;
+use tower_http::{
+    cors::{CorsLayer, Any},
+    services::ServeDir
+};
 
 #[tokio::main]
 async fn main() {
     let pool = connect_pool().await;
 
     let app = Router::new()
+        .nest_service("/photos", get_service(ServeDir::new("backend/data/photos")))
         .merge(routes::routes())
         .with_state(pool)
         .layer(

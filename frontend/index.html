@@ -2,35 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Altar Server</title>
+    <title>List Albs</title>
 </head>
 <body>
 
-    <h1>Add Altar Server</h1>
+<h2>Search Albs</h2>
 
-    <form id="add-server-form" enctype="multipart/form-data">
+<input id="search" type="text" placeholder="Search by code or size">
 
-        <label for="first_name">First Name:</label><br>
-        <input type="text" id="first_name" name="first_name" required><br><br>
+<label for="adultFilter">Alb Type:</label>
+<select id="adultFilter">
+    <option value="all">All</option>
+    <option value="1">Adult Alb</option>
+    <option value="0">Child Alb</option>
+</select>
 
-        <label for="last_name">Last Name:</label><br>
-        <input type="text" id="last_name" name="last_name" required><br><br>
+<label id="accessoryLabel" for="accessoryFilter">Has Accessory:</label>
+<select id="accessoryFilter">
+    <option value="all">All</option>
+    <option value="1">Yes</option>
+    <option value="0">No</option>
+</select>
 
-        <label for="phone">Phone (optional):</label><br>
-        <input type="text" id="phone" name="phone"><br><br>
+<hr>
 
-        <label for="birth_date">Birth Date:</label><br>
-        <input type="date" id="birth_date" name="birth_date" required><br><br>
+<div id="albs"></div>
 
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-
-        <label for="photo">Photo:</label><br>
-        <input type="file" id="photo" name="photo" accept="image/*"><br><br>
-
-        <button type="submit">Add Altar Server</button>
-
-    </form>
-    <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

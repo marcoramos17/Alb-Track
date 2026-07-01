@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Alb</title>
+</head>
+<body>
+
+    <h1>Add Alb</h1>
+
+    <form id="add-alb-form" enctype="multipart/form-data">
+
+        <label for="alb_code">Alb Code:</label><br>
+        <input type="text" id="alb_code" name="alb_code" required><br><br>
+
+        <label for="alb_size">Alb Size:</label><br>
+        <input type="text" id="alb_size" name="alb_size" required><br><br>
+
+        <label for="adult_alb">Alb Type:</label><br>
+        <select name="adult_alb" id="adult_alb" required>
+            <option value="" disabled selected>Select an option</option>
+            <option value="0">Child Alb</option>
+            <option value="1">Adult Alb</option>
+        </select><br><br>
+
+        <label for="has_accessory" style="display:none;">Has Accessory:</label><br>
+        <select name="has_accessory" id="has_accessory" style="display:none;" required>
+            <option value="" disabled selected>Select an option</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select><br><br>
+
+        <button type="submit">Add Alb</button>
+
+    </form>
+    <script src="app.js"></script>
+</body>
+</html>
