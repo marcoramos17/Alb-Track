@@ -1,5 +1,16 @@
 use serde::{Serialize, Deserialize};
 use sqlx::prelude::FromRow;
+use crate::types;
+
+// ENRICHED Implementation
+#[derive(Serialize)]
+pub struct EnrichedData {
+    pub users: Vec<types::User>,
+    pub churches: Vec<types::Church>,
+    pub albs: Vec<types::Alb>,
+
+    pub alb_church_pairs: Vec<(i64, Option<i64>)>,
+}
 
 // USER Implementation
 #[derive(Serialize, Deserialize, Debug, FromRow)]
@@ -27,7 +38,30 @@ pub struct Alb {
     pub notes: Option<String>,
 }
 
-pub struct AlbAssignment {
+// CHURCH Implementation
+#[derive(Serialize, Deserialize, Debug, FromRow)]
+pub struct Church {
+    pub church_id: Option<i64>,
+    pub church_name: Option<String>,
+}
+
+// ALB <-> USER Assignment
+#[derive(Serialize, Deserialize, Debug, FromRow)]
+pub struct AlbUserAssignment {
+    pub user_id: Option<i64>,
+    pub alb_id: Option<i64>,
+}
+
+// ALB <-> USER Assignment
+#[derive(Serialize, Deserialize, Debug, FromRow)]
+pub struct UserChurchAssignment {
+    pub user_id: Option<i64>,
+    pub church_id: Option<i64>,
+}
+
+// ALB <-> USER Assignment
+#[derive(Serialize, Deserialize, Debug, FromRow)]
+pub struct ChurchAlbAssignment {
     pub user_id: Option<i64>,
     pub alb_id: Option<i64>,
 }

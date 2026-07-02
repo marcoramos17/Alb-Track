@@ -33,29 +33,69 @@ async function loadUsers() {
     }
 
     const res = await fetch(`${API_URL}?${params.toString()}`);
-    const users = await res.json();
+    const enriched = await res.json();
 
-    renderUsers(users);
+    renderUsers(enriched);
 }
 
-function renderUsers(users) {
+function renderUsers(enriched) {
     usersDiv.innerHTML = "";
 
-    users.forEach(u => {
+    const users = enriched.users;
+    const churches = enriched.churches;
+    const albs = enriched.albs;
+
+    users.forEach(user => {
         const div = document.createElement("div");
 
+        // Backend already filtered these
+        const userChurches = churches;
+        const userAlbs = albs;
+
+        let relationHTML = "";
+
+        userChurches.forEach(church => {
+            relationHTML += `<strong>Church:</strong> ${church.church_name}<br>`;
+
+            // Match albs to this church
+            const albsForChurch = userAlbs.filter(a => a.church_id === church.church_id);
+
+            if (albsForChurch.length === 0) {
+                relationHTML += `&nbsp;&nbsp;Alb: <em>None</em><br>`;
+            } else {
+                albsForChurch.forEach(alb => {
+                    relationHTML += `&nbsp;&nbsp;Alb: ${alb.alb_code} (${alb.alb_size}cm)<br>`;
+                });
+            }
+
+            relationHTML += "<br>";
+        });
+
+        // Personal albs (no church)
+        const personalAlbs = userAlbs.filter(a => a.church_id === null);
+        if (personalAlbs.length > 0) {
+            relationHTML += `<strong>Personal Albs:</strong><br>`;
+            personalAlbs.forEach(alb => {
+                relationHTML += `&nbsp;&nbsp;Alb: ${alb.alb_code} (${alb.alb_size}cm)<br>`;
+            });
+        }
+
         div.innerHTML = `
-            <strong>${u.first_name} ${u.last_name}</strong><br>
-            Phone: ${u.phone ?? ""}<br>
-            Birth Date: ${u.birth_date}<br>
-            Active: ${u.active ? "Yes" : "No"}<br>
-            <img src="http://localhost:3000/photos/${u.user_id}.jpg" width="120">
+            <strong>${user.first_name} ${user.last_name}</strong><br>
+            Phone: ${user.phone ?? ""}<br>
+            Birth Date: ${user.birth_date}<br>
+            Active: ${user.active ? "Yes" : "No"}<br>
+            <img src="http://localhost:3000/photos/${user.user_id}.jpg" width="120"><br><br>
+
+            ${relationHTML}
             <hr>
         `;
 
         usersDiv.appendChild(div);
     });
 }
+
+
 
 // Auto-refresh on input changes
 searchInput.addEventListener("input", loadUsers);

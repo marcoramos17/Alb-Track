@@ -1,5 +1,5 @@
 use axum::{Router, routing::{get, post}};
-use crate::handlers::{users,albs};
+use crate::handlers::{users,albs, churches};
 use sqlx::SqlitePool;
 
 pub fn routes() -> Router<SqlitePool> {
@@ -10,4 +10,8 @@ pub fn routes() -> Router<SqlitePool> {
         .route("/api/albs", post(albs::create_alb)
                                                 .get(albs::fetch_albs)
         )
+        .route("/api/church", post(churches::create_church)
+                                                .get(churches::fetch_churches)
+        )
+
 }

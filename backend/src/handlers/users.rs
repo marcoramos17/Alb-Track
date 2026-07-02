@@ -7,6 +7,8 @@ use sqlx::{SqlitePool, Arguments};
 use tokio::fs;
 use crate::types;
 
+use crate::handlers::relations;
+
 pub async fn create_user(
     State(pool): State<SqlitePool>,
     mut multipart: Multipart,
@@ -129,7 +131,55 @@ pub async fn fetch_users_internal(
 pub async fn fetch_users(
     State(pool): State<SqlitePool>,
     Query(filter): Query<types::User>,
-) -> Json<Vec<types::User>> {
+) -> Json<types::EnrichedData> {
+
     let users = fetch_users_internal(&pool, &filter).await;
-    Json(users)
+
+    let mut churches = Vec::new();
+    let mut albs = Vec::new();
+
+    for user in &users {
+        let uid = user.user_id.unwrap();
+
+        // user ↔ church
+        let church_links = relations::user_church_relation(&pool, Some(uid), None).await;
+        for link in church_links {
+            if let Some(cid) = link.church_id {
+                let church = sqlx::query_as!(
+                    types::Church,
+                    "SELECT * FROM church WHERE church_id = ?",
+                    cid
+                )
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+
+                churches.push(church);
+            }
+        }
+
+        // user ↔ alb
+        let alb_links = relations::user_alb_relation(&pool, Some(uid), None).await;
+        for link in alb_links {
+            if let Some(aid) = link.alb_id {
+                let alb = sqlx::query_as!(
+                    types::Alb,
+                    "SELECT * FROM albs WHERE alb_id = ?",
+                    aid
+                )
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+
+                albs.push(alb);
+            }
+        }
+    }
+
+    Json(types::EnrichedData {
+        users,
+        churches,
+        albs,
+    })
 }
+
