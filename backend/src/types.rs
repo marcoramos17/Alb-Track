@@ -9,11 +9,11 @@ pub struct EnrichedData {
     pub churches: Vec<types::Church>,
     pub albs: Vec<types::Alb>,
 
-    pub alb_church_pairs: Vec<(i64, Option<i64>)>,
+    pub alb_church_pairs: Vec<(i64, i64, i64)>,
 }
 
 // USER Implementation
-#[derive(Serialize, Deserialize, Debug, FromRow)]
+#[derive(Clone, Serialize, Deserialize, Debug, FromRow)]
 pub struct User {
     pub user_id: Option<i64>,
     pub first_name: Option<String>,
@@ -62,6 +62,6 @@ pub struct UserChurchAssignment {
 // ALB <-> USER Assignment
 #[derive(Serialize, Deserialize, Debug, FromRow)]
 pub struct ChurchAlbAssignment {
-    pub user_id: Option<i64>,
+    pub church_id: Option<i64>,
     pub alb_id: Option<i64>,
 }

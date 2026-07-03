@@ -137,12 +137,16 @@ pub async fn fetch_users(
 
     let mut churches = Vec::new();
     let mut albs = Vec::new();
+    let mut alb_church_pairs = Vec::new();
 
     for user in &users {
         let uid = user.user_id.unwrap();
 
-        // user ↔ church
+        //
+        // USER ↔ CHURCH
+        //
         let church_links = relations::user_church_relation(&pool, Some(uid), None).await;
+
         for link in church_links {
             if let Some(cid) = link.church_id {
                 let church = sqlx::query_as!(
@@ -155,11 +159,17 @@ pub async fn fetch_users(
                 .unwrap();
 
                 churches.push(church);
+
+                // record mapping: user → church
+                alb_church_pairs.push((uid, 0, cid)); // alb_id = 0 means "no alb"
             }
         }
 
-        // user ↔ alb
+        //
+        // USER ↔ ALB
+        //
         let alb_links = relations::user_alb_relation(&pool, Some(uid), None).await;
+
         for link in alb_links {
             if let Some(aid) = link.alb_id {
                 let alb = sqlx::query_as!(
@@ -172,6 +182,15 @@ pub async fn fetch_users(
                 .unwrap();
 
                 albs.push(alb);
+
+                //
+                // ALB ↔ CHURCH
+                //
+                let alb_church = relations::church_alb_relation(&pool, None, Some(aid)).await;
+                let church_id = alb_church.first().and_then(|c| c.church_id);
+
+                // record mapping: user → alb → church
+                alb_church_pairs.push((uid, aid, church_id.unwrap_or(0)));
             }
         }
     }
@@ -180,6 +199,6 @@ pub async fn fetch_users(
         users,
         churches,
         albs,
+        alb_church_pairs,
     })
 }
-

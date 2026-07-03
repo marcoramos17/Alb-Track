@@ -12,18 +12,14 @@ async function loadUsers() {
 
     if (search !== "") {
         if (search.includes(" ")) {
-            // Full name search
             const [first, last] = search.split(" ", 2);
-
             params.append("first_name", first);
             params.append("last_name", last);
         } else {
-            // Single term search
             params.append("first_name", search);
             params.append("last_name", search);
         }
     }
-
 
     // Active filter
     if (activeFilter.value === "active") {
@@ -44,21 +40,41 @@ function renderUsers(enriched) {
     const users = enriched.users;
     const churches = enriched.churches;
     const albs = enriched.albs;
+    const pairs = enriched.alb_church_pairs;
 
     users.forEach(user => {
         const div = document.createElement("div");
 
-        // Backend already filtered these
-        const userChurches = churches;
-        const userAlbs = albs;
-
         let relationHTML = "";
 
+        //
+        // CHURCHES FOR THIS USER
+        //
+        const userChurches = churches.filter(church => {
+            return pairs.some(p => p[0] === user.user_id && p[2] === church.church_id);
+        });
+
+        //
+        // ALBS FOR THIS USER
+        //
+        const userAlbs = albs.filter(alb => {
+            return pairs.some(p => p[0] === user.user_id && p[1] === alb.alb_id);
+        });
+
+        //
+        // DISPLAY CHURCHES + ALBS
+        //
         userChurches.forEach(church => {
             relationHTML += `<strong>Church:</strong> ${church.church_name}<br>`;
 
-            // Match albs to this church
-            const albsForChurch = userAlbs.filter(a => a.church_id === church.church_id);
+            const albsForChurch = userAlbs.filter(alb => {
+                const pair = pairs.find(p =>
+                    p[0] === user.user_id &&
+                    p[1] === alb.alb_id &&
+                    p[2] === church.church_id
+                );
+                return !!pair;
+            });
 
             if (albsForChurch.length === 0) {
                 relationHTML += `&nbsp;&nbsp;Alb: <em>None</em><br>`;
@@ -71,8 +87,18 @@ function renderUsers(enriched) {
             relationHTML += "<br>";
         });
 
-        // Personal albs (no church)
-        const personalAlbs = userAlbs.filter(a => a.church_id === null);
+        //
+        // PERSONAL ALBS (church_id = 0)
+        //
+        const personalAlbs = userAlbs.filter(alb => {
+            const pair = pairs.find(p =>
+                p[0] === user.user_id &&
+                p[1] === alb.alb_id &&
+                p[2] === 0
+            );
+            return !!pair;
+        });
+
         if (personalAlbs.length > 0) {
             relationHTML += `<strong>Personal Albs:</strong><br>`;
             personalAlbs.forEach(alb => {
@@ -94,8 +120,6 @@ function renderUsers(enriched) {
         usersDiv.appendChild(div);
     });
 }
-
-
 
 // Auto-refresh on input changes
 searchInput.addEventListener("input", loadUsers);
